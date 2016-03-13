@@ -6,13 +6,17 @@ import edu.wpi.first.wpilibj.RobotDrive.MotorType;
 import edu.wpi.first.wpilibj.*;
 
 public class Robot extends IterativeRobot {
-	Victor FL = new Victor (1);
-	Victor FR = new Victor (0);
 	Victor BL = new Victor (3);
 	Victor BR = new Victor (2);
-	Timer myTimer;
-	RobotDrive drive = new RobotDrive(FR, FL, BR, BL);
+	Victor FL = new Victor (1);
+	Victor FR = new Victor (0);
+	Timer myTimer = new Timer();
+	RobotDrive drive = new RobotDrive(BL, FL, BR, FR);
+	Talon arm = new Talon (4);
+	//DigitalInput down = new DigitalInput(5);
+	//DigitalInput up = new DigitalInput(6);
 	Joystick joy = new Joystick (0);
+	Joystick armjoy = new Joystick(1);
 	boolean horiz = false;
 
     public void robotInit() {
@@ -31,45 +35,34 @@ public class Robot extends IterativeRobot {
      */
     public void autonomousPeriodic() {
     	
-    	double speed = 0.2;
-    	double seconds = 1;
-    	double distance = 3; 
-    	if (myTimer.get() < 2.0)
+    	double speed = 0.4;
+    	if (myTimer.get() < 0.8)
     	{
-    		FR.set(speed);
-    		FL.set(speed);
-    		BL.set(speed);
-    		BR.set(speed);
+    		drive.mecanumDrive_Cartesian(0,speed, 0, 0);
     	}
-    	else if (myTimer.get() < 4.0){
-    		FR.set(-speed);
-	    	FL.set(-speed);
-	    	BL.set(-speed);
-	    	BR.set(-speed);
+    	else if (myTimer.get() < 1.5){
+    		drive.mecanumDrive_Cartesian(0,-speed, 0, 0);
     	}
+    	else if (myTimer.get() < 6.8)
+    	{
+    		drive.mecanumDrive_Cartesian(-speed, 0, 0,0);
+    	}
+    	else
+    	{
+    		drive.mecanumDrive_Cartesian(0, 0, 0, 0);
+    	}
+//    	if (myTimer.get() < 3)
+//    	{
+//    		drive.mecanumDrive_Cartesian(0,speed, 0, 0);
+//    	}
+//    	else if (myTimer.get() < 6)
+//    	{
+//    		drive.mecanumDrive_Cartesian(0, -speed, 0, 0);
+//    	}
+
     	
 
-//    	Timer.delay(seconds);
-//    	FR.set(speed);
-//    	FL.set(-speed);
-//    	BL.set(-speed);
-//    	BR.set(speed);
-//    	Timer.delay(0.4);
-//    	FR.set(speed);
-//    	FL.set(speed);
-//    	BL.set(speed);
-//    	BR.set(speed);
-//    	Timer.delay(distance);
-//    	FR.set(speed);
-//    	FL.set(-speed);
-//    	BL.set(-speed);
-//    	BR.set(speed);
-//    	Timer.delay(0.4);
-//    	FR.set(0);
-//    	FL.set(0);
-//    	BL.set(0);
-//    	BR.set(0);
-//    	Timer.delay(9.2);
+
     }
 
     /**
@@ -78,26 +71,32 @@ public class Robot extends IterativeRobot {
     public void teleopPeriodic() {
     	if (!horiz)
     	{
-    		drive.mecanumDrive_Cartesian(joy.getX(), joy.getY(), joy.getTwist(), 0);
+    		drive.mecanumDrive_Cartesian(-joy.getX(), joy.getY(), joy.getTwist(), 0);
     	}
     	else
    		{
-   			drive.mecanumDrive_Cartesian(2*joy.getY()/3, 2*joy.getX()/3, 2*joy.getZ()/3, 0);
+   			drive.mecanumDrive_Cartesian(-joy.getY(), joy.getX(), joy.getTwist(), 0);
    		}
-    	if (joy.getThrottle() > 0.9)
+    	if (joy.getThrottle() < 0.9)
     	{
     		horiz = true;
-    		System.out.println("Horizontal mode activated");
     	}
     	else 
     	{
     		horiz = false;
     	}
+    	if (armjoy.getY() > 0.1 )// down.get() == true)
+    	{
+    		arm.set(0.3);
+    	}
+    	else if (armjoy.getY() < -0.1)// && up.get() == true)
+    	{
+    		arm.set(-0.5);
+    	}
+    	else	
+    	{
+    		arm.set(0);
+    	}
     	Timer.delay(0.01);
     }
-    
-    /**
-     * This function is called periodically during test mode
-     */
-
 }
